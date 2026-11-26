@@ -5,7 +5,8 @@
  * Uso: node tests/e2e/import.mjs [pasta-de-screenshots]
  */
 import { createRequire } from 'node:module';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, copyFile, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startServer } from '../serve.mjs';
@@ -168,6 +169,15 @@ async function run() {
   await addSource(page, { type: 'file', name: 'Ficheiro', file: FIXTURE });
   await page.click('[data-source-form] [type="submit"]');
   check((await waitResult(page)) === 'Lista importada', 'import por ficheiro concluída');
+  await closeSheets(page);
+
+  /* 8b. Ficheiro descarregado pela app Atalhos (nome "get.php", sem extensão M3U) */
+  const tmp = await mkdtemp(join(tmpdir(), 'iptv-'));
+  const phpFile = join(tmp, 'get.php');
+  await copyFile(FIXTURE, phpFile);
+  await addSource(page, { type: 'file', name: 'Atalhos', file: phpFile });
+  await page.click('[data-source-form] [type="submit"]');
+  check((await waitResult(page)) === 'Lista importada', 'ficheiro "get.php" com conteúdo M3U importado');
   await closeSheets(page);
 
   /* 9. Lista grande (50 000 entradas) */

@@ -45,6 +45,19 @@ export async function openDownloadHelp(source) {
         <a class="btn btn--primary btn--lg" data-download-link target="_blank" rel="noopener noreferrer">${icon('download', { size: 'sm' })}<span>Abrir no Safari</span></a>
         <button class="btn btn--secondary btn--lg" type="button" data-copy>Copiar endereço</button>
       </div>
+      <details class="disclosure">
+        <summary>Se o Safari ficar com a página em branco: usar a app Atalhos</summary>
+        <ol class="steps steps--spaced">
+          <li class="step"><span class="step__num">1</span><span>Toque em <b>Copiar endereço</b> (acima).</span></li>
+          <li class="step"><span class="step__num">2</span><span>Abra a app <b>Atalhos</b> do iPhone → <b>+</b> (novo atalho) → <b>Adicionar ação</b>.</span></li>
+          <li class="step"><span class="step__num">3</span><span>Pesquise e adicione <b>URL</b>; toque no campo e cole o endereço.</span></li>
+          <li class="step"><span class="step__num">4</span><span>Pesquise e adicione <b>Obter conteúdo do URL</b>.</span></li>
+          <li class="step"><span class="step__num">5</span><span>Pesquise e adicione <b>Guardar ficheiro</b>.</span></li>
+          <li class="step"><span class="step__num">6</span><span>Toque em <b>▶</b> (executar) e escolha uma pasta em Ficheiros. Pode demorar 1–2 minutos em listas grandes.</span></li>
+          <li class="step"><span class="step__num">7</span><span>Volte à app: <b>Adicionar lista → Ficheiro</b> e escolha o ficheiro guardado (o nome pode ser, por exemplo, <b>get.php</b> — é normal).</span></li>
+        </ol>
+        <p class="field__hint">O atalho fica com o endereço (e a password) guardado. Apague-o depois de usar, ou guarde-o se quiser repetir a atualização mais tarde.</p>
+      </details>
       <div class="notice notice--warning notice--top">
         ${icon('shield', { size: 'sm' })}
         <div class="notice__body">O endereço contém o seu utilizador e password (é assim que o fornecedor funciona) e viaja sem cifra por HTTP. Não o partilhe com ninguém.</div>

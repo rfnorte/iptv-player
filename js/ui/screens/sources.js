@@ -190,7 +190,7 @@ function detailMarkup(s) {
             <label class="cell" for="replace-file">
               <span class="cell__icon">${icon('file', { size: 'sm' })}</span>
               <span class="cell__body"><span class="cell__title">Importar ficheiro novamente</span><span class="cell__subtitle">Substitui o conteúdo pela nova versão do ficheiro</span></span>
-              <input class="sr-only" type="file" id="replace-file" accept=".m3u,.m3u8,.txt,audio/x-mpegurl,application/x-mpegurl,application/vnd.apple.mpegurl">
+              <input class="sr-only" type="file" id="replace-file">
             </label>` : html`
             <button class="cell" type="button" data-action="refresh" ${importing ? html`disabled` : ''}>
               <span class="cell__icon">${icon('download', { size: 'sm' })}</span>

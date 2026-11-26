@@ -77,7 +77,7 @@ function formMarkup({ source, initialType = 'url' }) {
       <div class="form" data-panel="file" ${type === 'file' ? '' : html`hidden`}>
         ${editing ? html`<p class="field__hint">Ficheiro atual: ${source.fileName ?? '—'}. Para o substituir use "Importar ficheiro novamente" na página da lista.</p>` : html`
           <label class="file-drop">
-            <input type="file" id="src-file" accept=".m3u,.m3u8,.txt,audio/x-mpegurl,audio/mpegurl,application/x-mpegurl,application/vnd.apple.mpegurl">
+            <input type="file" id="src-file">
             ${icon('file', { size: 'lg' })}
             <span data-file-label>Escolher ficheiro M3U</span>
             <span class="field__hint">Na app Ficheiros, iCloud Drive ou transferências.</span>
@@ -208,7 +208,7 @@ function mountForm(body, sheet, { source, onSaved }) {
       label.className = 'file-drop__name';
       if (file.size === 0) setMsg(form, 'src-file', 'O ficheiro está vazio.');
       else if (file.size > MAX_FILE_MB * 1_048_576) setMsg(form, 'src-file', `Ficheiro demasiado grande (máximo ${MAX_FILE_MB} MB).`);
-      else if (!/\.(m3u8?|txt)$/i.test(file.name)) setMsg(form, 'src-file', 'Extensão invulgar: confirme que é uma lista M3U.', 'warning');
+      else if (!/\.(m3u8?|txt)$/i.test(file.name)) setMsg(form, 'src-file', `${formatBytes(file.size)} · o conteúdo será verificado ao importar.`, 'ok');
       else setMsg(form, 'src-file', `${formatBytes(file.size)} · pronto a importar.`, 'ok');
       const name = form.querySelector('#src-name');
       if (!name.value) name.placeholder = file.name.replace(/\.(m3u8?|txt)$/i, '');
