@@ -101,6 +101,7 @@ async function renderScreen(ctx) {
       }), 'Os dados de demonstração não incluem streams e não são reproduzíveis.')}
 
       ${group('Aplicação', html`
+        ${cell({ iconName: 'diagnostics', title: 'Diagnóstico de reprodução', subtitle: 'Capacidades do aparelho e streams de teste', href: '#/settings/diagnostics' })}
         ${cell({ iconName: 'download', title: 'Instalar no iPhone', subtitle: isStandalone() ? 'Instalada' : 'Adicionar ao ecrã principal', action: 'install' })}
         ${cell({ iconName: 'info', iconVariant: 'neutral', title: 'Versão', trailing: html`<span class="cell__value">${APP_VERSION}</span>`, subtitle: APP_STAGE })}`)}
 

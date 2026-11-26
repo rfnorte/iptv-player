@@ -9,6 +9,30 @@ import { channelLogo } from './components/cards.js';
 import { icon } from './components/icons.js';
 import { openSheet } from './components/overlay.js';
 import { toast } from './components/toast.js';
+import { openPlayer } from '../player/player.js';
+import { canPlay } from '../player/stream-source.js';
+import { safeUrl } from '../core/dom.js';
+
+const DEMO_NOTE = 'Conteúdo de demonstração: não tem vídeo associado.';
+
+/** Reproduz um canal (com navegação rápida pelos canais da mesma categoria). */
+export async function playChannel(id) {
+  const ch = await catalog.channel(id);
+  if (!ch) { toast('Canal não encontrado.', { type: 'error' }); return; }
+  if (!canPlay(ch.play)) { openChannelSheet(id); return; }
+  const neighbours = (await catalog.channelNeighbours(id)).filter((c) => canPlay(c.play));
+  openPlayer({
+    title: ch.name,
+    subtitle: ch.categoryName,
+    play: ch.play,
+    isLive: true,
+    artwork: safeUrl(ch.logo),
+    logoItem: ch,
+    epg: ch.epg,
+    neighbours,
+    index: Math.max(0, neighbours.findIndex((c) => c.id === ch.id)),
+  });
+}
 
 /** Atualiza um botão de favorito no sítio, sem re-renderizar a lista. */
 function paintFavButton(btn, added) {
@@ -42,7 +66,7 @@ export function bindCommonActions(outlet, ctx) {
     }),
     on(outlet, 'click', '[data-action="open-channel"]', (e, btn) => {
       e.preventDefault();
-      openChannelSheet(btn.dataset.id);
+      playChannel(btn.dataset.id);
     }),
     on(outlet, 'click', '[data-action="back"]', (e, btn) => {
       e.preventDefault();
@@ -85,20 +109,21 @@ export async function openChannelSheet(id) {
           ? html`<div class="programme-list">${programmeBlock('Agora', ch.epg.now, { current: true })}${programmeBlock('A seguir', ch.epg.next)}</div>`
           : html`<p class="text-tertiary">Sem informação de programação para este canal.</p>`}
         <div class="channel-sheet__actions">
-          <button class="btn btn--primary btn--lg btn--block" type="button" disabled aria-describedby="play-note">
+          <button class="btn btn--primary btn--lg btn--block" type="button" data-sheet-play ${canPlay(ch.play) ? '' : html`disabled aria-describedby="play-note"`}>
             ${icon('play', { size: 'sm' })}<span>Reproduzir</span>
           </button>
           <button class="btn btn--secondary btn--lg btn--block" type="button" data-sheet-fav aria-pressed="${isFav ? 'true' : 'false'}" aria-label="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}: ${ch.name}">
             ${icon(isFav ? 'heartFill' : 'heart', { size: 'sm' })}<span data-fav-label>${isFav ? 'Nos favoritos' : 'Favorito'}</span>
           </button>
         </div>
-        <p class="field__hint" id="play-note">O leitor de vídeo é implementado na Fase 4.${ch.id.startsWith('demo-') ? ' Os dados deste canal são fictícios (modo demonstração).' : ''}</p>
+        ${canPlay(ch.play) ? '' : html`<p class="field__hint" id="play-note">${DEMO_NOTE}</p>`}
       </div>`,
-    onMount(body) {
+    onMount(body, sheet) {
       const btn = body.querySelector('[data-sheet-fav]');
       const onClick = () => toggleFavorite('live', ch.id, btn);
       btn.addEventListener('click', onClick);
-      return () => btn.removeEventListener('click', onClick);
+      const offPlay = on(body, 'click', '[data-sheet-play]', () => { sheet.close(); playChannel(ch.id); });
+      return () => { btn.removeEventListener('click', onClick); offPlay(); };
     },
   });
 }

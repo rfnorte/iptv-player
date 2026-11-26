@@ -11,10 +11,11 @@ Leitor IPTV pessoal, instalável no iPhone pelo Safari ("Adicionar ao ecrã prin
 | 1. Planeamento e arquitetura | ✅ Concluída |
 | 2. Design System + shell (5 ecrãs, componentes, modo demonstração) | ✅ Concluída |
 | 3. Gestão IPTV (parser M3U, Xtream, IndexedDB) | ✅ Concluída |
-| 4. Reprodução | ⏳ Seguinte |
-| 5–10 | Por iniciar |
+| 4. Reprodução | ✅ Concluída (validada com streams de teste; a fonte do utilizador está bloqueada pelo fornecedor) |
+| 5. Filmes e séries (histórico, continuar a ver) | ⏳ Seguinte |
+| 6–10 | Por iniciar |
 
-### O que já funciona (v0.3.0)
+### O que já funciona (v0.4.0)
 - Navegação completa: Início, TV, Filmes, Séries, Definições, Pesquisa global, detalhe de filme/série, gestão de listas.
 - **Modo demonstração** com conteúdos fictícios gerados localmente (sem URLs nem streams) para avaliar a interface.
 - TV: categorias, pesquisa instantânea, ordenação, vista lista/grelha, lista virtualizada (milhares de canais sem lentidão), ficha do canal com "agora/a seguir".
@@ -26,9 +27,10 @@ Leitor IPTV pessoal, instalável no iPhone pelo Safari ("Adicionar ao ecrã prin
 - Gestão de listas: editar, ativar/desativar, atualizar, atualização automática ao abrir a app, eliminar. IDs estáveis: favoritos sobrevivem a atualizações.
 - Credenciais cifradas (AES-GCM, chave não exportável). Ver limitações em `docs/SECURITY.md`.
 - Eliminação de todos os dados locais (IndexedDB, preferências, caches) com confirmação.
+- **Leitor de vídeo próprio:** HLS nativo no iPhone (hls.js em computadores), direto com reconexão automática, VOD com barra de progresso e ±10 s, legendas e faixas de áudio, AirPlay, Picture-in-Picture, ecrã inteiro nativo do iOS, mudança rápida de canal, controlos no ecrã bloqueado. Só mostra controlos suportados pelo aparelho.
+- **Diagnóstico de reprodução** (Definições): capacidades do aparelho, streams de teste públicos e da própria app, teste de qualquer endereço e relatório copiável.
 
 ### O que ainda não funciona (intencionalmente)
-- Reprodução de vídeo (Fase 4) — o botão "Reproduzir" está desativado e indica a fase.
 - EPG real (Fase 6), favoritos persistentes e backup (Fase 7), instalação offline completa (Fase 8).
 
 ## Pré-visualizar no computador

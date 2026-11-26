@@ -1,0 +1,11 @@
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:126000,LOCAL:00:00:00.000
+
+00:00:01.000 --> 00:00:06.000
+Legenda de teste em português.
+
+00:00:08.000 --> 00:00:14.000
+Se lê isto, as legendas funcionam.
+
+00:00:16.000 --> 00:00:22.000
+Fim do teste de legendas.

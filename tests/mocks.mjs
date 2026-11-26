@@ -7,6 +7,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
+const MEDIA = join(dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'test', 'media');
+const flakyCounts = new Map();
+const MEDIA_TYPES = { m3u8: 'application/vnd.apple.mpegurl', ts: 'video/mp2t', vtt: 'text/vtt' };
 export const XT_USER = 'utilizador-teste';
 export const XT_PASS = 'password-secreta-123';
 
@@ -48,6 +51,23 @@ export async function handleMock(req, res, { cors = true } = {}) {
   if (!url.pathname.startsWith('/__mock/')) return false;
   const headers = cors ? { 'Access-Control-Allow-Origin': '*' } : {};
   const send = (status, type, body) => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', ...headers }); res.end(body); };
+
+  // /__mock/flaky/<id>/<ficheiro>: as 2 primeiras tentativas do master falham (503), depois serve normalmente.
+  const flaky = /^\/__mock\/flaky\/([\w-]+)\/(.+)$/.exec(url.pathname);
+  if (flaky) {
+    const [, id, rest] = flaky;
+    if (rest === 'master.m3u8') {
+      const n = (flakyCounts.get(id) ?? 0) + 1;
+      flakyCounts.set(id, n);
+      if (n <= 2) { send(503, 'text/plain', 'indisponível'); return true; }
+    }
+    if (rest.includes('..')) { send(400, 'text/plain', 'bad'); return true; }
+    try {
+      const body = await readFile(join(MEDIA, rest));
+      send(200, MEDIA_TYPES[rest.split('.').pop()] ?? 'application/octet-stream', body);
+    } catch { send(404, 'text/plain', 'not found'); }
+    return true;
+  }
 
   switch (url.pathname) {
     case '/__mock/list.m3u':

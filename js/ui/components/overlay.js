@@ -11,19 +11,25 @@ let lockCount = 0;
 let savedScrollY = 0;
 let idSeq = 0;
 
-function lockScroll() {
+let lockedHash = '';
+
+export function lockScroll() {
   if (lockCount++ > 0) return;
   savedScrollY = window.scrollY;
+  lockedHash = location.hash;
   document.body.style.top = `-${savedScrollY}px`;
   document.body.classList.add('is-scroll-locked');
 }
 
-function unlockScroll() {
+export function unlockScroll() {
   if (--lockCount > 0) return;
   lockCount = 0;
   document.body.classList.remove('is-scroll-locked');
   document.body.style.top = '';
-  window.scrollTo(0, savedScrollY);
+  // Só repõe a posição se ainda estivermos no mesmo ecrã (o router gere a posição do novo ecrã).
+  if (location.hash === lockedHash) window.scrollTo(0, savedScrollY);
+  // O layout mudou sem evento de scroll: avisa componentes que dependem da posição (listas virtuais).
+  document.dispatchEvent(new CustomEvent('layout:changed'));
 }
 
 function host() {

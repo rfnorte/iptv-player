@@ -80,6 +80,13 @@
   --color-live:            var(--p-red-400);      /* badge "AO VIVO" */
   --color-text-on-status:  var(--p-ink-950);      /* texto escuro sobre fills de estado */
 
+  /* Leitor de vídeo */
+  --color-player-bg:    #000000;
+  --color-player-press: rgb(255 255 255 / 0.14);
+  --color-player-track: rgb(255 255 255 / 0.28);
+  --gradient-player:    linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0) 28%, rgb(0 0 0 / 0) 62%, rgb(0 0 0 / 0.7) 100%);
+  --text-shadow-player: 0 1px 6px rgb(0 0 0 / 0.6);
+
   /* Skeletons */
   --color-skeleton:        var(--p-ink-850);
   --color-skeleton-shine:  rgb(255 255 255 / 0.05);

@@ -13,6 +13,8 @@ import { movieDetailScreen, seriesDetailScreen } from './ui/screens/detail.js';
 import { searchScreen } from './ui/screens/search.js';
 import { settingsScreen } from './ui/screens/settings.js';
 import { sourcesScreen, sourceDetailScreen } from './ui/screens/sources.js';
+import { diagnosticsScreen } from './ui/screens/diagnostics.js';
+import { closePlayer } from './player/player.js';
 import { refreshDueSources, syncEvents } from './iptv/source-sync.js';
 import { getSource } from './data/sources.js';
 import { prefs } from './data/prefs.js';
@@ -46,6 +48,7 @@ const routes = [
   { path: '/settings', tab: 'settings', screen: settingsScreen },
   { path: '/settings/sources', tab: 'settings', screen: sourcesScreen },
   { path: '/settings/sources/:id', tab: 'settings', screen: sourceDetailScreen },
+  { path: '/settings/diagnostics', tab: 'settings', screen: diagnosticsScreen },
 ].map((r) => ({ ...r, onError: errorScreen }));
 
 function renderTabbar(el) {
@@ -86,6 +89,7 @@ function start() {
     fallback: '/home',
     onNavigate({ route }) {
       closeAllOverlays();
+      closePlayer();
       setActiveTab(tabbar, route.tab);
     },
   });

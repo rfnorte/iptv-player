@@ -8,6 +8,9 @@ import { artBlock, emptyState } from '../components/cards.js';
 import { chips, setChips } from '../components/controls.js';
 import { icon } from '../components/icons.js';
 import { bindCommonActions } from '../shared.js';
+import { openPlayer } from '../../player/player.js';
+import { canPlay } from '../../player/stream-source.js';
+import { safeUrl } from '../../core/dom.js';
 
 function notFound(ctx, fallback, label) {
   render(ctx.outlet, html`
@@ -31,11 +34,11 @@ function hero(item) {
     </div>`;
 }
 
-function actions(kind, item, { resumeLabel }) {
+function actions(kind, item, { resumeLabel, playable }) {
   const isFav = favorites.has(kind, item.id);
   return html`
     <div class="detail-actions">
-      <button class="btn btn--primary btn--lg" type="button" disabled aria-describedby="detail-play-note">
+      <button class="btn btn--primary btn--lg" type="button" data-action="play" ${playable ? '' : html`disabled aria-describedby="detail-play-note"`}>
         ${icon('play', { size: 'sm' })}<span>${resumeLabel ?? 'Reproduzir'}</span>
       </button>
       <button class="btn btn--secondary btn--lg" type="button" data-action="toggle-fav" data-kind="${kind}" data-id="${item.id}"
@@ -43,7 +46,7 @@ function actions(kind, item, { resumeLabel }) {
         ${icon(isFav ? 'heartFill' : 'heart', { size: 'sm' })}<span data-fav-label>${isFav ? 'Nos favoritos' : 'Favorito'}</span>
       </button>
     </div>
-    <p class="field__hint" id="detail-play-note">A reprodução é implementada na Fase 4.</p>`;
+    ${playable ? '' : html`<p class="field__hint" id="detail-play-note">Conteúdo de demonstração: não tem vídeo associado.</p>`}`;
 }
 
 function metaText(parts) {
@@ -69,12 +72,23 @@ async function renderMovie(ctx) {
           <span class="progress" data-vars="${vars({ progress: percent })}"></span>
           <span class="text-tertiary">${percent}% visto · ${formatDuration(movie.durationMin * (1 - percent / 100))} restantes</span>
         </div>` : ''}
-      ${actions('movie', movie, { resumeLabel: Number.isFinite(percent) ? 'Continuar' : null })}
+      ${actions('movie', movie, { resumeLabel: Number.isFinite(percent) ? 'Continuar' : null, playable: canPlay(movie.play) })}
       ${movie.description ? html`<p class="detail-description">${movie.description}</p>` : ''}
     </div>`);
   outlet.querySelector('[data-meta]').textContent = metaText([movie.year, formatDuration(movie.durationMin), movie.genres?.[0]]);
 
-  const offs = [bindCommonActions(outlet, ctx), mountHeader(outlet)];
+  const offs = [
+    bindCommonActions(outlet, ctx),
+    mountHeader(outlet),
+    on(outlet, 'click', '[data-action="play"]', () => openPlayer({
+      title: movie.name,
+      subtitle: metaText([movie.year, movie.genres?.[0]]),
+      play: movie.play,
+      isLive: false,
+      artwork: safeUrl(movie.poster),
+      description: movie.description,
+    })),
+  ];
   return () => offs.forEach((off) => off());
 }
 
@@ -84,15 +98,16 @@ function episodeList(seasonData, lastWatched) {
     <ol class="episodes" aria-label="Episódios da temporada ${seasonData.number}">
       ${seasonData.episodes.map((ep) => {
         const isLast = lastWatched && lastWatched.season === ep.season && lastWatched.episode === ep.episode;
-        return html`
-          <li class="episode ${isLast ? 'episode--last' : ''}">
+        const inner = html`
             <span class="episode__num">${ep.episode}</span>
             <span class="episode__body">
               <span class="episode__title truncate">${ep.name}</span>
               <span class="episode__meta">${formatDuration(ep.durationMin)}${isLast ? html` · <b class="episode__flag">Último visto</b>` : ''}</span>
               ${isLast ? html`<span class="progress" data-vars="${vars({ progress: lastWatched.percent })}"></span>` : ''}
-            </span>
-          </li>`;
+            </span>`;
+        return canPlay(ep.play)
+          ? html`<li><button class="episode episode--playable ${isLast ? 'episode--last' : ''}" type="button" data-action="play-episode" data-season="${ep.season}" data-episode="${ep.episode}" aria-label="Reproduzir episódio ${ep.episode}: ${ep.name}">${inner}<span class="episode__play">${icon('play', { size: 'sm' })}</span></button></li>`
+          : html`<li class="episode ${isLast ? 'episode--last' : ''}">${inner}</li>`;
       })}
     </ol>`;
 }
@@ -119,7 +134,7 @@ async function renderSeries(ctx) {
           ${icon('history', { size: 'sm' })}
           <div class="notice__body"><div class="notice__title">Último episódio visto</div>T${lw.season} · E${lw.episode} — ${lastEp.name} (${lw.percent}%)</div>
         </div>` : ''}
-      ${actions('series', series, { resumeLabel: lastEp ? `Continuar T${lw.season}·E${lw.episode}` : null })}
+      ${actions('series', series, { resumeLabel: lastEp ? `Continuar T${lw.season}·E${lw.episode}` : null, playable: series.seasons.some((s) => s.episodes.some((e) => canPlay(e.play))) })}
       ${series.description ? html`<p class="detail-description">${series.description}</p>` : ''}
       <section>
         <h2 class="section-header__title">Episódios</h2>
@@ -132,6 +147,19 @@ async function renderSeries(ctx) {
     series.seasons.length ? `${series.seasons.length} ${series.seasons.length === 1 ? 'temporada' : 'temporadas'}` : null,
     series.genres?.[0],
   ]);
+
+  const playEpisode = (seasonNo, episodeNo) => {
+    const ep = series.seasons.find((s) => s.number === seasonNo)?.episodes.find((x) => x.episode === episodeNo);
+    if (!ep || !canPlay(ep.play)) return;
+    openPlayer({
+      title: `${series.name}`,
+      subtitle: `T${ep.season} · E${ep.episode} — ${ep.name}`,
+      play: ep.play,
+      isLive: false,
+      artwork: safeUrl(series.poster),
+      description: series.description,
+    });
+  };
 
   const epEl = outlet.querySelector('[data-episodes]');
   const showSeason = () => {
@@ -151,6 +179,11 @@ async function renderSeries(ctx) {
     bindCommonActions(outlet, ctx),
     mountHeader(outlet),
     on(outlet, 'click', '[data-action="retry-episodes"]', () => ctx.router.refresh()),
+    on(outlet, 'click', '[data-action="play-episode"]', (e, b) => playEpisode(Number(b.dataset.season), Number(b.dataset.episode))),
+    on(outlet, 'click', '[data-action="play"]', () => {
+      const target = lw ?? { season: series.seasons[0]?.number, episode: series.seasons[0]?.episodes[0]?.episode };
+      playEpisode(target.season, target.episode);
+    }),
     on(outlet, 'click', '[data-chip="season"]', (e, b) => {
       season = Number(b.dataset.value);
       setChips(outlet, 'season', b.dataset.value);

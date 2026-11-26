@@ -175,3 +175,16 @@
 
 .steps--spaced { margin: var(--space-4) 0; }
 .notice--top { margin-top: var(--space-4); }
+
+/* Episódio reproduzível */
+.episode--playable { width: 100%; text-align: left; transition: background var(--duration-fast); }
+.episode--playable:active { background: var(--color-surface-active); }
+.episode__play { color: var(--color-accent); flex: none; }
+
+/* ---- Diagnóstico ---- */
+.cell--stack { align-items: flex-start; }
+.cell--stack .btn { flex: none; align-self: center; }
+.diag-result { display: flex; gap: var(--space-1); align-items: flex-start; margin-top: var(--space-1); font-size: var(--text-xs); font-weight: var(--weight-medium); }
+.diag-result--ok { color: var(--color-success); }
+.diag-result--error { color: var(--color-danger); }
+.diag-custom { display: grid; gap: var(--space-3); padding: var(--space-4); }

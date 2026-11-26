@@ -73,3 +73,16 @@ A app **não** usará proxies públicos de terceiros (exporiam credenciais).
 ## 6. Segurança das credenciais
 
 Ver [`SECURITY.md`](./SECURITY.md). Resumo honesto: **uma PWA não tem acesso ao Keychain do iOS.** O que é possível é cifrar a password com uma chave não exportável (Web Crypto) — protege contra fugas acidentais (backups, exportações, inspeção casual), **não** contra alguém com acesso ao telemóvel desbloqueado ou código malicioso a correr na mesma origem.
+
+## 7. Leitor (Fase 4) — o que foi implementado e o que falta validar no iPhone
+
+| Comportamento | Implementação | Validado |
+|---|---|---|
+| HLS nativo no Safari; hls.js só sem HLS nativo | `js/player/engine.js` | Chromium ✅ · iPhone ⏳ |
+| Reprodução inicia após toque (sem autoplay bloqueado) | `video.play()` no gesto; se recusado, mostra botão | Chromium ✅ · iPhone ⏳ |
+| Ecrã inteiro → `webkitEnterFullscreen()` (controlos da Apple) | `player.js` | iPhone ⏳ |
+| AirPlay / PiP só quando disponíveis | deteção de capacidades | iPhone ⏳ |
+| MKV/AVI: aviso antes de tentar | `stream-source.js` | simulado ✅ · iPhone ⏳ |
+| Stream HTTP numa app HTTPS | tenta; se falhar, mensagem específica | iPhone ⏳ (teste "Apple BipBop por HTTP" no Diagnóstico) |
+| Direto: reconexão 1, 2, 4, 8, 16 s (5 tentativas) | `player.js` | Chromium ✅ |
+| Ao voltar à app, o direto retoma no momento atual | `visibilitychange` | iPhone ⏳ |

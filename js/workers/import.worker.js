@@ -42,13 +42,13 @@ async function removeStale(sourceId, ids, { keepEpisodes = false } = {}) {
 }
 
 /* ---------------- M3U (URL, ficheiro ou reclassificação) ---------------- */
-async function importM3U(sourceId, stream, total, overrides) {
+async function importM3U(sourceId, stream, total, overrides, baseUrl) {
   const collector = createM3UCollector(sourceId, overrides);
   let pending = [];
   const parser = new M3UParser((entry) => {
     const item = collector.add(entry);
     if (item) pending.push(item);
-  });
+  }, { baseUrl });
 
   let bytes = 0;
   await readTextStream(stream, async (text, read) => {
@@ -106,7 +106,8 @@ async function importM3UUrl(sourceId, url, overrides) {
   const res = await fetchWithTimeout(url, { timeoutMs: 30_000 });
   const total = Number(res.headers.get('content-length')) || 0;
   if (!res.body) throw new NetError('empty', 'O servidor não devolveu conteúdo.');
-  return importM3U(sourceId, res.body, total, overrides);
+  // res.url é o endereço final (após redirecionamentos): base para URLs relativos
+  return importM3U(sourceId, res.body, total, overrides, res.url || url);
 }
 
 async function importM3UFile(sourceId, file, overrides) {

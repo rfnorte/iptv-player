@@ -48,12 +48,16 @@ export function parseExtinf(line) {
   return { duration: durationMatch ? Number(durationMatch[1]) : -1, attrs, title: cleanText(title) };
 }
 
-/** Valida e normaliza um URL de stream. Devolve null se inválido/não suportado. */
-export function normalizeStreamUrl(raw) {
+/**
+ * Valida e normaliza um URL de stream. Devolve null se inválido/não suportado.
+ * Endereços relativos ("media/x.m3u8") só são aceites com `baseUrl` (lista
+ * obtida por endereço) e resolvidos em relação a ele.
+ */
+export function normalizeStreamUrl(raw, baseUrl) {
   const value = cleanText(raw, 4096);
   if (!value) return { url: null, reason: 'empty' };
   try {
-    const u = new URL(value);
+    const u = baseUrl && !/^[a-z][a-z\d+.-]*:/i.test(value) ? new URL(value, baseUrl) : new URL(value);
     if (!ALLOWED_PROTOCOLS.has(u.protocol)) return { url: null, reason: 'protocol' };
     return { url: u.href, reason: null };
   } catch {
@@ -71,9 +75,13 @@ function nameFromUrl(url) {
 }
 
 export class M3UParser {
-  /** @param {(entry: object) => void} onEntry */
-  constructor(onEntry) {
+  /**
+   * @param {(entry: object) => void} onEntry
+   * @param {{baseUrl?: string}} [opts] baseUrl: endereço da lista, para resolver URLs relativos
+   */
+  constructor(onEntry, { baseUrl } = {}) {
     this.onEntry = onEntry;
+    this.baseUrl = baseUrl || null;
     this.buffer = '';
     this.pending = null;
     this.pendingGroup = null;
@@ -133,7 +141,7 @@ export class M3UParser {
       return;
     }
 
-    const { url, reason } = normalizeStreamUrl(line);
+    const { url, reason } = normalizeStreamUrl(line, this.baseUrl);
     const info = this.pending;
     const group = this.pendingGroup;
     this.pending = null;
@@ -162,9 +170,9 @@ export class M3UParser {
 }
 
 /** Conveniência para texto completo (testes, ficheiros pequenos). */
-export function parseM3U(text) {
+export function parseM3U(text, opts) {
   const entries = [];
-  const parser = new M3UParser((e) => entries.push(e));
+  const parser = new M3UParser((e) => entries.push(e), opts);
   parser.feed(text);
   const stats = parser.end();
   return { entries, stats, epgUrls: parser.epgUrls };

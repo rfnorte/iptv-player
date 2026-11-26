@@ -16,3 +16,6 @@ node_modules/
 
 # Fixtures sintéticas de teste (sem dados reais) são permitidas
 !tests/fixtures/**
+
+# Lista e vídeos de teste sintéticos da própria app (sem dados pessoais)
+!assets/test/**

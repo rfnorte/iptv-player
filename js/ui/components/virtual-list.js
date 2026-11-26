@@ -53,7 +53,8 @@ export function createVirtualList(container, { metrics, renderItem, overscan = 4
     const first = Math.max(0, Math.floor(-top / stride) - overscan);
     const last = Math.min(rows, Math.ceil((window.innerHeight - top) / stride) + overscan);
     if (first === range[0] && last === range[1]) return;
-    range = [first, last];
+    // Intervalo vazio (lista fora do ecrã): não memoriza, para recalcular no próximo evento.
+    range = first < last ? [first, last] : [-1, -1];
 
     win.style.transform = `translateY(${first * stride}px)`;
     const start = first * m.columns;
@@ -72,10 +73,16 @@ export function createVirtualList(container, { metrics, renderItem, overscan = 4
 
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', schedule, { passive: true });
+  document.addEventListener('layout:changed', schedule);
   ro.observe(container);
 
   return {
-    setItems(next) { items = next; measure(); },
+    setItems(next) {
+      items = next;
+      measure();
+      // Segunda medição após o layout estabilizar (router/scroll restaurados neste frame).
+      requestAnimationFrame(() => { range = [-1, -1]; update(); });
+    },
     /** Re-renderiza as linhas visíveis (ex.: após alterar um favorito). */
     refresh() { range = [-1, -1]; update(); },
     itemAt: (index) => items[index],
@@ -84,6 +91,7 @@ export function createVirtualList(container, { metrics, renderItem, overscan = 4
       cancelAnimationFrame(frame);
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
+      document.removeEventListener('layout:changed', schedule);
       ro.disconnect();
     },
   };

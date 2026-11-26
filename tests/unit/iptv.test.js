@@ -216,3 +216,14 @@ test('parser: fins de linha só com CR (Mac antigo) e mistos', () => {
   p.feed('#EXTM3U\r'); p.feed('\n#EXTINF:-1,A\r'); p.feed('\nhttp://a.example.com/1\r'); p.feed('\n');
   assert.equal(p.end().entries, 1);
 });
+
+test('parser: URLs relativos só com endereço base', () => {
+  const text = '#EXTM3U\n#EXTINF:-1,A\nmedia/a.m3u8\n#EXTINF:-1,B\n/abs/b.m3u8\n#EXTINF:-1,C\nhttps://x.example.com/c.m3u8\n';
+  const withBase = parseM3U(text, { baseUrl: 'https://app.example.com/iptv/assets/test/lista.m3u' }).entries.map((e) => e.url);
+  assert.deepEqual(withBase, ['https://app.example.com/iptv/assets/test/media/a.m3u8', 'https://app.example.com/abs/b.m3u8', 'https://x.example.com/c.m3u8']);
+  const noBase = parseM3U(text);
+  assert.equal(noBase.entries.length, 1);
+  assert.equal(noBase.stats.invalid, 2);
+  // protocolos perigosos continuam rejeitados mesmo com base
+  assert.equal(parseM3U('#EXTM3U\n#EXTINF:-1,X\njavascript:alert(1)\n', { baseUrl: 'https://a.example.com/' }).entries.length, 0);
+});

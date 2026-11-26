@@ -24,14 +24,17 @@ syncEvents.on('changed', invalidate);
 prefs.on('change', ({ key }) => { if (key === 'demo' || key === '*') invalidate(); });
 
 /* ---------- Mapeamento dos itens guardados para o modelo dos ecrãs ---------- */
+/** Dados mínimos para obter o endereço de reprodução (ver player/stream-source.js). */
+const playRef = (i, kind) => ({ kind, sourceId: i.sourceId, url: i.url ?? null, streamId: i.streamId ?? i.episodeId ?? null, extension: i.extension ?? null });
+
 const toChannel = (i) => ({
   id: i.id, kind: 'live', name: i.name, logo: i.logo, categoryId: i.categoryId, categoryName: i.group,
-  number: i.chno ?? i.order + 1, sourceId: i.sourceId, tvgId: i.tvgId, order: i.order,
+  number: i.chno ?? i.order + 1, sourceId: i.sourceId, tvgId: i.tvgId, order: i.order, play: playRef(i, 'live'),
 });
 const toMovie = (i) => ({
   id: i.id, kind: 'movie', name: i.name, poster: i.logo, year: i.year ?? null, genres: [i.group],
   rating: i.rating ?? null, addedAt: i.addedAt ?? null, durationMin: null, description: null,
-  categoryId: i.categoryId, sourceId: i.sourceId, order: i.order,
+  categoryId: i.categoryId, sourceId: i.sourceId, order: i.order, play: playRef(i, 'movie'),
 });
 const toSeries = (i) => ({
   id: i.id, kind: 'series', name: i.name, poster: i.poster, year: i.year ?? null, genres: [i.group],
@@ -100,7 +103,7 @@ function groupSeasons(episodes) {
   const map = new Map();
   for (const e of [...episodes].sort((a, b) => a.season - b.season || a.episode - b.episode || a.order - b.order)) {
     const season = map.get(e.season) ?? { number: e.season, episodes: [] };
-    season.episodes.push({ id: e.id, season: e.season, episode: e.episode, name: e.title || e.name, durationMin: e.durationMin ?? null });
+    season.episodes.push({ id: e.id, season: e.season, episode: e.episode, name: e.title || e.name, durationMin: e.durationMin ?? null, play: playRef(e, 'episode') });
     map.set(e.season, season);
   }
   return [...map.values()];
@@ -175,6 +178,14 @@ export const catalog = {
     const list = d.channels.filter((c) =>
       (category === 'all' || (favIds ? favIds.has(c.id) : c.categoryId === category)) && matches(c, q));
     return sortItems(list, sort).map(withEpg);
+  },
+
+  /** Canais da mesma categoria, pela ordem da lista (para navegação rápida no leitor). */
+  async channelNeighbours(id) {
+    const d = await source();
+    const c = d.channels.find((x) => x.id === id);
+    if (!c) return [];
+    return d.channels.filter((x) => x.categoryId === c.categoryId).map(withEpg);
   },
 
   async channel(id) {
