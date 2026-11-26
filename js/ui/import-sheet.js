@@ -9,6 +9,7 @@ import { getSource } from '../data/sources.js';
 import { importSource } from '../iptv/source-sync.js';
 import { icon } from './components/icons.js';
 import { openSheet } from './components/overlay.js';
+import { canOfferDownload, openDownloadHelp } from './download-help.js';
 
 const PHASES = {
   connect: 'A ligar ao servidor…',
@@ -67,8 +68,10 @@ function errorView(source, err) {
       <h3 class="import-result__title">Não foi possível importar</h3>
       <p class="import-result__text">${err.message}</p>
       ${err.hint ? html`<p class="field__hint import-result__text">${err.hint}</p>` : ''}
+      ${canOfferDownload(source, err.code) ? html`
+        <button class="btn btn--gradient btn--lg btn--block" type="button" data-download-help>${icon('download', { size: 'sm' })}<span>Obter a lista pelo Safari</span></button>` : ''}
       <div class="form-actions">
-        ${source.type !== 'm3u-file' ? html`<button class="btn btn--primary btn--lg" type="button" data-retry>Tentar novamente</button>` : ''}
+        ${source.type !== 'm3u-file' ? html`<button class="btn btn--${canOfferDownload(source, err.code) ? 'secondary' : 'primary'} btn--lg" type="button" data-retry>Tentar novamente</button>` : ''}
         <a class="btn btn--secondary btn--lg" href="#/settings/sources/${encodeURIComponent(source.id)}" data-close>Ver lista</a>
       </div>
     </div>`;
@@ -97,9 +100,12 @@ export async function openImportSheet(sourceId, { file } = {}) {
           if (alive) render(target, errorView(source, err));
         });
       };
-      const off = on(body, 'click', '[data-retry]', run);
+      const offs = [
+        on(body, 'click', '[data-retry]', run),
+        on(body, 'click', '[data-download-help]', () => openDownloadHelp(source)),
+      ];
       run();
-      return () => { alive = false; off(); };
+      return () => { alive = false; offs.forEach((off) => off()); };
     },
   });
 }

@@ -8,7 +8,7 @@ import { parseM3U, parseExtinf, M3UParser } from '../../js/iptv/m3u-parser.js';
 import { classify, parseEpisode, parseYear } from '../../js/iptv/classifier.js';
 import { createM3UCollector, buildXtreamItems } from '../../js/iptv/collector.js';
 import {
-  validateAuth, normalizeLive, normalizeVod, normalizeSeries, normalizeSeriesInfo, normalizeCategories, buildStreamUrl, buildApiUrl,
+  validateAuth, buildM3uDownloadUrl, normalizeLive, normalizeVod, normalizeSeries, normalizeSeriesInfo, normalizeCategories, buildStreamUrl, buildApiUrl,
 } from '../../js/iptv/xtream-api.js';
 import { redactUrl, describeFetchError } from '../../js/iptv/net.js';
 
@@ -199,4 +199,9 @@ test('describeFetchError distingue mixed content', () => {
   assert.equal(describeFetchError(new TypeError('x'), 'http://a.example.com').code, 'mixed');
   assert.equal(describeFetchError(new TypeError('x'), 'https://a.example.com').code, 'network');
   delete globalThis.location;
+});
+
+test('xtream: endereço de descarga da lista M3U em HLS', () => {
+  assert.equal(buildM3uDownloadUrl('http://srv.example.com:8080', 'a b', 'p&1'),
+    'http://srv.example.com:8080/get.php?username=a+b&password=p%261&type=m3u_plus&output=m3u8');
 });

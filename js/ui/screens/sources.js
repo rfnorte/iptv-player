@@ -15,6 +15,7 @@ import { toast } from '../components/toast.js';
 import { bindCommonActions } from '../shared.js';
 import { openSourceForm } from '../source-form.js';
 import { openImportSheet } from '../import-sheet.js';
+import { canOfferDownload, openDownloadHelp } from '../download-help.js';
 
 const TYPE_ICON = { 'm3u-url': 'link', 'm3u-file': 'file', xtream: 'server' };
 const KIND_LABEL = { live: 'TV', movie: 'Filmes', episode: 'Séries' };
@@ -175,7 +176,8 @@ function detailMarkup(s) {
         <div class="notice notice--error" role="alert">
           ${icon('alert', { size: 'sm' })}
           <div class="notice__body"><div class="notice__title">${err.message}</div>${err.hint ?? ''}</div>
-        </div>` : ''}
+        </div>
+        ${canOfferDownload(s, err.code) ? html`<button class="btn btn--gradient btn--lg btn--block" type="button" data-action="download-help">${icon('download', { size: 'sm' })}<span>Obter a lista pelo Safari</span></button>` : ''}` : ''}
       ${s.insecure ? html`
         <div class="notice notice--warning">${icon('alert', { size: 'sm' })}
           <div class="notice__body"><div class="notice__title">Servidor sem HTTPS</div>A ligação não é cifrada e o iPhone pode bloquear pedidos a partir da app. Se o fornecedor tiver endereço HTTPS, prefira-o.</div>
@@ -248,6 +250,7 @@ async function renderDetail(ctx) {
     syncEvents.on('changed', (e) => { if (ctx.isActive() && (!e?.sourceId || e.sourceId === id || e.id === id)) paint(); }),
     syncEvents.on('start', (e) => { if (ctx.isActive() && e.sourceId === id) paint(); }),
     on(outlet, 'click', '[data-action="refresh"]', () => openImportSheet(id)),
+    on(outlet, 'click', '[data-action="download-help"]', async () => openDownloadHelp(await getSource(id))),
     on(outlet, 'change', '#replace-file', (e, input) => {
       const file = input.files?.[0];
       if (file) openImportSheet(id, { file });

@@ -40,6 +40,21 @@ export function buildStreamUrl(server, username, password, kind, id, extension) 
   return `${base}/${folder}/${u}/${p}/${encodeURIComponent(id)}.${ext(extension, 'mp4')}`;
 }
 
+/**
+ * Endereço da lista M3U completa de uma conta Xtream (get.php).
+ * `output=m3u8` pede os canais em HLS (o único formato de direto que o Safari reproduz).
+ * Usado quando a API não é acessível a partir da app (servidor só HTTP): o utilizador
+ * abre este endereço diretamente no Safari, guarda o ficheiro e importa-o.
+ */
+export function buildM3uDownloadUrl(server, username, password) {
+  const u = new URL('get.php', server.endsWith('/') ? server : `${server}/`);
+  u.searchParams.set('username', username);
+  u.searchParams.set('password', password);
+  u.searchParams.set('type', 'm3u_plus');
+  u.searchParams.set('output', 'm3u8');
+  return u.href;
+}
+
 export function validateAuth(json) {
   if (!json || typeof json !== 'object' || !json.user_info) {
     throw new NetError('format', 'O servidor não respondeu como um serviço Xtream Codes.', {

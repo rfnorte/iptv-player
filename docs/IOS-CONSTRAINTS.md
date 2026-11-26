@@ -14,6 +14,10 @@
 | `<video src="http://…m3u8">` a partir de página HTTPS | Tratado como mixed content "passivo": o WebKit pode reproduzir, tentar promover para HTTPS ou bloquear, conforme a versão. | ⚠️ |
 | hls.js (só desktop) | Usa XHR → **exige CORS** em todos os segmentos. | ✅ |
 
+**Confirmado no iPhone do utilizador (26/11/2026, v0.3.0):** o fornecedor Xtream só responde por HTTP e o Safari bloqueia o pedido à API a partir da app (erro `mixed`). A importação direta não é possível para esta fonte.
+
+**Mitigação implementada (v0.3.1):** botão "Obter a lista pelo Safari" — gera o endereço `get.php?…&type=m3u_plus&output=m3u8`, que o Safari abre como navegação normal (permitida); o utilizador guarda o ficheiro e importa-o. **Por validar na Fase 4:** se o `<video>` reproduz streams HTTP a partir da app HTTPS.
+
 **Consequências e mitigação (por ordem de preferência, todas gratuitas):**
 
 1. **Importar ficheiro M3U do dispositivo** (app Ficheiros) — contorna totalmente CORS/mixed content para a *lista*. Fica sempre disponível.

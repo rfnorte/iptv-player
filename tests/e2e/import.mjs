@@ -42,7 +42,7 @@ async function waitResult(page) {
 
 async function closeSheets(page) {
   while (await page.locator('.sheet [data-close].icon-btn').count()) {
-    await page.locator('.sheet [data-close].icon-btn').first().click();
+    await page.locator('.sheet [data-close].icon-btn').last().click();
     await page.waitForTimeout(150);
   }
 }
@@ -203,7 +203,19 @@ async function run() {
   check(await page.locator('.source-card', { hasText: 'Grande' }).count() === 0, 'lista eliminada');
   await shot(page, 'p3-07-sources-list');
 
-  /* 11. Eliminar todos os dados */
+  /* 11. Fornecedor bloqueado → ajuda para obter a lista pelo Safari */
+  await addSource(page, { type: 'xtream', name: 'Bloqueado', server: `http://127.0.0.1:${NOCORS_PORT}/__mock/xtream`, user: XT_USER, pass: XT_PASS });
+  await page.click('[data-source-form] [type="submit"]');
+  check((await waitResult(page)) === 'Não foi possível importar', 'servidor bloqueado → erro explicado');
+  await page.click('[data-download-help]');
+  await page.waitForSelector('[data-download-link]');
+  const href = await page.getAttribute('[data-download-link]', 'href');
+  check(/\/get\.php\?username=.+&password=.+&type=m3u_plus&output=m3u8$/.test(href), 'botão "Obter a lista pelo Safari" gera endereço M3U em HLS');
+  check(!(await page.content()).includes(XT_PASS) || (await page.locator('[data-download-link]').count()) === 1, 'password só presente no link do painel aberto');
+  await shot(page, 'p3-08-download-help');
+  await closeSheets(page);
+
+  /* 12. Eliminar todos os dados */
   await page.evaluate(() => { location.hash = '#/settings'; });
   await page.waitForSelector('[data-action="wipe"]');
   await page.click('[data-action="wipe"]');
