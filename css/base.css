@@ -40,6 +40,17 @@ button {
   cursor: pointer; touch-action: manipulation;
 }
 button:disabled { cursor: default; }
+a, label, summary { touch-action: manipulation; }
+
+/* Cartões e controlos não abrem a pré-visualização de link nem o menu de cópia ao pressionar */
+a, button, .channel-row, .channel-tile, .poster, .wide-card, .logo-tile, .category-tile, .source-card, .tabbar {
+  -webkit-touch-callout: none;
+}
+img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
+
+/* Gesto de voltar (deslizar da margem esquerda) */
+.view.is-swiping { transition: none; }
+.view.is-swipe-release { transition: transform var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out); }
 
 input, select, textarea { font-size: var(--text-input); }
 

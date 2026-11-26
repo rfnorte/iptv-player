@@ -49,7 +49,10 @@
   --color-surface-hover:   var(--p-ink-700);
   --color-overlay:         rgb(9 11 16 / 0.72);
   --color-scrim:           rgb(0 0 0 / 0.55);
-  --color-glass:           rgb(17 21 29 / 0.72);   /* tab bar / headers com blur */
+  --color-glass:           rgb(17 21 29 / 0.72);   /* headers com blur */
+  --color-glass-strong:    rgb(24 30 41 / 0.78);   /* barra inferior flutuante */
+  --color-glass-edge:      rgb(255 255 255 / 0.10);
+  --color-glass-highlight: rgb(255 255 255 / 0.07);
 
   /* Texto */
   --color-text:            var(--p-fog-50);   /* 18.3:1 sobre bg */
@@ -179,8 +182,13 @@
      Layout, toque e safe areas
      ------------------------------------------------------------------ */
   --touch-min:      44px;   /* Apple HIG */
-  --tabbar-height:  56px;
-  --header-height:  52px;
+  --header-height:  44px;   /* barra de navegação iOS */
+
+  /* Barra inferior flutuante (estilo iOS 26): cápsula de vidro acima do indicador inicial */
+  --tabbar-height:  60px;
+  --tabbar-gap-x:   var(--space-4);
+  --tabbar-offset:  max(var(--safe-bottom), 12px);   /* nunca dentro da zona do indicador inicial */
+  --tabbar-space:   calc(var(--tabbar-height) + var(--tabbar-offset) + var(--space-4));
   --player-controls-height: 64px;
 
   --safe-top:    env(safe-area-inset-top, 0px);
@@ -197,6 +205,7 @@
 
   /* Blur do vidro (tab bar, headers) */
   --blur-glass: saturate(180%) blur(20px);
+  --blur-glass-strong: saturate(190%) blur(28px);
 
   /* ------------------------------------------------------------------
      Camadas (z-index)

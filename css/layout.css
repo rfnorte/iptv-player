@@ -13,7 +13,7 @@
 .view {
   max-width: var(--content-max);
   margin: 0 auto;
-  padding: 0 var(--pad-r) calc(var(--tabbar-height) + var(--safe-bottom) + var(--space-10)) var(--pad-l);
+  padding: 0 var(--pad-r) calc(var(--tabbar-space) + var(--space-6)) var(--pad-l);
   outline: none;
 }
 
@@ -94,24 +94,27 @@
 }
 .large-title__eyebrow::first-letter { text-transform: uppercase; }
 
-/* ---- Barra de navegação inferior ---- */
+/* ---- Barra de navegação inferior: cápsula de vidro flutuante (iOS 26) ---- */
 .tabbar {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: calc(var(--safe-left) + var(--tabbar-gap-x));
+  right: calc(var(--safe-right) + var(--tabbar-gap-x));
+  bottom: var(--tabbar-offset);
   z-index: var(--z-tabbar);
-  padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background: var(--color-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-  backdrop-filter: var(--blur-glass);
-  border-top: 1px solid var(--color-border);
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-glass-strong);
+  -webkit-backdrop-filter: var(--blur-glass-strong);
+  backdrop-filter: var(--blur-glass-strong);
+  box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--color-glass-edge), inset 0 1px 0 var(--color-glass-highlight);
 }
 
 .tabbar__list {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  max-width: 640px;
-  margin: 0 auto;
-  height: var(--tabbar-height);
+  height: calc(var(--tabbar-height) - 8px);
 }
 
 .tabbar__item {
@@ -120,21 +123,40 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
+  height: 100%;
   min-height: var(--touch-min);
-  color: var(--color-text-tertiary);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
   font-size: var(--text-2xs);
-  font-weight: var(--weight-medium);
-  transition: color var(--duration-fast) var(--ease-standard);
+  font-weight: var(--weight-semibold);
+  transition: color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
 }
 
 .tabbar__item .icon { transition: transform var(--duration-fast) var(--ease-spring); }
-.tabbar__item:active .icon { transform: scale(0.9); }
-.tabbar__item[aria-current="page"] { color: var(--color-accent); }
+.tabbar__item:active .icon { transform: scale(0.88); }
+.tabbar__item[aria-current="page"] { color: var(--color-accent); background: var(--color-accent-soft); }
 
-/* Telemóvel em horizontal: altura útil reduzida → cabeçalhos mais compactos */
+/* Ecrãs de listagem (TV, Filmes, Séries): pesquisa, filtros e ferramentas */
+.list-screen > [data-empty]:empty { display: none; }
+
+/* Telemóvel em horizontal (ex.: iPhone 17 Pro Max: 956 × 440 pt): a altura é o recurso
+   escasso → título no cabeçalho, barra inferior compacta, controlos lado a lado. */
 @media (orientation: landscape) and (max-height: 500px) {
-  .large-title { font-size: var(--text-2xl); padding-bottom: var(--space-2); }
+  :root { --tabbar-height: 52px; }   /* itens com 44 pt (mínimo da Apple) */
   .app { --section-gap: var(--space-6); }
+
+  .large-title { display: none; }
+  .screen-header__compact { opacity: 1; transform: none; }
+
+  .tabbar { max-width: 480px; }
+  .tabbar__item { flex-direction: row; gap: var(--space-2); font-size: var(--text-xs); }
+  .tabbar__item .icon { width: 20px; height: 20px; }
+
+  .list-screen { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-3); }
+  .list-screen > * { grid-column: 1 / -1; }
+  .list-screen > .search-field { grid-column: 1; grid-row: 1; }
+  .list-screen > .toolbar { grid-column: 2; grid-row: 1; }
+  .list-screen > [data-continue] > section { grid-column: 1 / -1; }
 }
 
 @media (min-width: 768px) {

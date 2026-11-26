@@ -49,7 +49,7 @@ export async function renderScreen(ctx) {
 
   render(outlet, html`
     ${screenHeader({ title: 'TV' })}
-    <div class="stack stack--sm">
+    <div class="stack stack--sm list-screen">
       ${searchField({ id: 'tv-search', placeholder: 'Pesquisar canais' })}
       ${chips('cat', chipOptions, state.category, { label: 'Categorias' })}
       <div class="toolbar">

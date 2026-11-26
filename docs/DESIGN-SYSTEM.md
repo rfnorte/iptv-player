@@ -77,3 +77,20 @@ Fonte do sistema (SF Pro no iPhone). Justificação: zero bytes a descarregar, r
 - Foco visível (`:focus-visible`) com anel `--color-accent-ring` (teclado externo / acessibilidade).
 - Animações apenas em `transform` e `opacity` (fluidas a 60/120 Hz).
 - Nada de `alert()`/`confirm()` nativos: Dialog e Toast próprios.
+
+## 7. Otimização para iPhone 17 Pro Max (iOS 26) — v0.3.4
+
+Dispositivo de referência: **440 × 956 pt @3x** (1320 × 2868 px), Dynamic Island. Safe areas assumidas (a confirmar no aparelho): vertical topo 62 / base 34; horizontal laterais 62 / base 21.
+
+| Decisão | Motivo |
+|---|---|
+| Barra inferior em **cápsula de vidro flutuante**, sempre acima do indicador inicial | Linguagem visual do iOS 26; toques fora da zona do gesto de sair da app |
+| Barra de navegação superior de **44 pt** | Padrão iOS; recupera espaço vertical |
+| **Avisos no topo** (abaixo da Dynamic Island) | Não tapam botões de painéis nem listas |
+| **Horizontal compacto**: título no cabeçalho, pesquisa e ferramentas na mesma linha, barra de 52 pt com ícone e texto lado a lado | A altura (440 pt) é o recurso escasso; TV passa de 1 para 4 canais visíveis |
+| `:active` ativado no iOS, sem pré-visualização de links ao pressionar, sem zoom por toque duplo | Sensação de app nativa |
+| Painéis sobem acima do **teclado** (`visualViewport`) | O iOS não encolhe o layout quando o teclado abre |
+| **Deslizar da margem esquerda para voltar** (só na app instalada) | A PWA instalada não tem o gesto nativo do Safari |
+| Ícone, ecrãs de arranque (vertical/horizontal) e manifesto | Aspeto de app no ecrã principal |
+
+Validação automática: `tests/e2e/iphone.mjs` (nenhum elemento interativo ou texto fixo nas safe areas, sem scroll horizontal, nº mínimo de canais visíveis) e `tests/e2e/gestures.mjs`.

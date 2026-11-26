@@ -18,6 +18,7 @@ import { getSource } from './data/sources.js';
 import { prefs } from './data/prefs.js';
 import { toast } from './ui/components/toast.js';
 import { formatCount } from './core/format.js';
+import { setupIOS } from './core/ios.js';
 
 const TABS = [
   { id: 'home', path: '/home', label: 'Início', icon: 'home' },
@@ -66,6 +67,7 @@ function start() {
   const outlet = document.getElementById('view');
   const tabbar = document.getElementById('tabbar');
   renderTabbar(tabbar);
+  setupIOS(outlet);
 
   // Imagens externas (logótipos/capas): só aparecem depois de carregadas; se falharem são
   // removidas e fica visível o fallback gerado (iniciais / arte).

@@ -63,7 +63,7 @@ export function createLibraryScreen(cfg) {
 
     render(outlet, html`
       ${screenHeader({ title: cfg.title })}
-      <div class="stack stack--sm">
+      <div class="stack stack--sm list-screen">
         ${searchField({ id: `${cfg.kind}-search`, placeholder: `Pesquisar ${cfg.plural}` })}
         ${chips('genre', [
           { value: 'all', label: 'Todos', count: status.counts[cfg.kind] },

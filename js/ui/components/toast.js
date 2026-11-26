@@ -21,8 +21,8 @@ export function toast(message, { type = 'info', action, duration = 3500 } = {}) 
     ${action ? html`<button class="btn btn--ghost btn--sm" type="button" data-toast-action>${action.label}</button>` : ''}
   `);
 
-  while (host.children.length >= MAX_VISIBLE) host.firstElementChild.remove();
-  host.append(el);
+  while (host.children.length >= MAX_VISIBLE) host.lastElementChild.remove();
+  host.prepend(el);
   requestAnimationFrame(() => el.classList.add('is-visible'));
 
   let timer = null;

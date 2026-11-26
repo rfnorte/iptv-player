@@ -1,0 +1,17 @@
+{
+  "name": "IPTV Player",
+  "short_name": "IPTV",
+  "description": "Leitor IPTV pessoal para iPhone.",
+  "lang": "pt-PT",
+  "start_url": "./index.html#/home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090B10",
+  "theme_color": "#090B10",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
