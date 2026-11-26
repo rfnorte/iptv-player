@@ -18,6 +18,8 @@
 
 **Mitigação implementada (v0.3.1):** botão "Obter a lista pelo Safari" — gera o endereço `get.php?…&type=m3u_plus&output=m3u8`, que o Safari abre como navegação normal (permitida); o utilizador guarda o ficheiro e importa-o. **Por validar na Fase 4:** se o `<video>` reproduz streams HTTP a partir da app HTTPS.
 
+**Confirmado no iPhone do utilizador (v0.3.5):** o mesmo fornecedor devolve uma resposta **vazia (0 bytes)** ao pedido da lista M3U feito pelo Safari e pela app Atalhos. Conclusão: o fornecedor restringe a entrega da lista a clientes que ele próprio aprova. A app **não** contorna esta restrição (ex.: fazendo-se passar por outro leitor), por respeito às regras do projeto e dos termos do fornecedor. Um proxy também não resolveria: o pedido continuaria a não vir de um cliente aprovado.
+
 **Consequências e mitigação (por ordem de preferência, todas gratuitas):**
 
 1. **Importar ficheiro M3U do dispositivo** (app Ficheiros) — contorna totalmente CORS/mixed content para a *lista*. Fica sempre disponível.
