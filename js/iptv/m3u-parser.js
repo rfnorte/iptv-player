@@ -83,7 +83,9 @@ export class M3UParser {
   }
 
   feed(text) {
-    this.buffer += text;
+    // Aceita os três formatos de fim de linha: LF (Unix), CRLF (Windows) e CR (Mac antigo).
+    // Um CR no fim de um bloco seguido de LF no seguinte gera só uma linha vazia (ignorada).
+    this.buffer += text.replace(/\r\n?/g, '\n');
     let idx;
     while ((idx = this.buffer.indexOf('\n')) !== -1) {
       const line = this.buffer.slice(0, idx);

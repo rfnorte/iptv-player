@@ -205,3 +205,14 @@ test('xtream: endereço de descarga da lista M3U em HLS', () => {
   assert.equal(buildM3uDownloadUrl('http://srv.example.com:8080', 'a b', 'p&1'),
     'http://srv.example.com:8080/get.php?username=a+b&password=p%261&type=m3u_plus&output=m3u8');
 });
+
+test('parser: fins de linha só com CR (Mac antigo) e mistos', () => {
+  const cr = '#EXTM3U\r#EXTINF:-1,A\rhttp://a.example.com/1.m3u8\r#EXTINF:-1,B\rhttp://a.example.com/2.m3u8\r';
+  assert.equal(parseM3U(cr).entries.length, 2);
+  const mixed = '#EXTM3U\r\n#EXTINF:-1,A\nhttp://a.example.com/1\r#EXTINF:-1,B\r\nhttp://a.example.com/2';
+  assert.deepEqual(parseM3U(mixed).entries.map((e) => e.name), ['A', 'B']);
+  // CRLF partido entre blocos
+  const p = new M3UParser(() => {});
+  p.feed('#EXTM3U\r'); p.feed('\n#EXTINF:-1,A\r'); p.feed('\nhttp://a.example.com/1\r'); p.feed('\n');
+  assert.equal(p.end().entries, 1);
+});

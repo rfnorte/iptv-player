@@ -139,7 +139,7 @@ function readForm(form, { editing }) {
   } else if (!editing) {
     const file = form.querySelector('#src-file')?.files?.[0];
     if (!file) { setMsg(form, 'src-file', 'Escolha um ficheiro M3U.'); ok = false; }
-    else if (file.size === 0) { setMsg(form, 'src-file', 'O ficheiro está vazio.'); ok = false; }
+    else if (file.size === 0) { setMsg(form, 'src-file', 'O ficheiro está vazio (0 bytes): o servidor não enviou conteúdo.'); ok = false; }
     else if (file.size > MAX_FILE_MB * 1_048_576) { setMsg(form, 'src-file', `Ficheiro demasiado grande (máximo ${MAX_FILE_MB} MB).`); ok = false; }
     data.file = file;
     data.fileName = file?.name;
@@ -206,7 +206,7 @@ function mountForm(body, sheet, { source, onSaved }) {
       if (!file) { label.textContent = 'Escolher ficheiro M3U'; setMsg(form, 'src-file', ''); return; }
       label.textContent = file.name;
       label.className = 'file-drop__name';
-      if (file.size === 0) setMsg(form, 'src-file', 'O ficheiro está vazio.');
+      if (file.size === 0) setMsg(form, 'src-file', 'O ficheiro está vazio (0 bytes): o servidor não enviou conteúdo. O fornecedor pode recusar descarregamentos fora das apps IPTV que suporta.');
       else if (file.size > MAX_FILE_MB * 1_048_576) setMsg(form, 'src-file', `Ficheiro demasiado grande (máximo ${MAX_FILE_MB} MB).`);
       else if (!/\.(m3u8?|txt)$/i.test(file.name)) setMsg(form, 'src-file', `${formatBytes(file.size)} · o conteúdo será verificado ao importar.`, 'ok');
       else setMsg(form, 'src-file', `${formatBytes(file.size)} · pronto a importar.`, 'ok');

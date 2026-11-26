@@ -74,7 +74,13 @@ async function importM3U(sourceId, stream, total, overrides) {
         hint: 'O endereço pode apontar para uma página web ou para um único stream. Confirme o URL fornecido.',
       });
     }
-    throw new NetError('empty', 'A lista está vazia ou não contém endereços válidos.');
+    const parts = [`${stats.lines} linhas lidas`];
+    if (stats.invalid) parts.push(`${stats.invalid} endereços inválidos`);
+    if (stats.unsupported) parts.push(`${stats.unsupported} com protocolo não suportado (rtmp, udp…)`);
+    if (stats.orphanInfo) parts.push(`${stats.orphanInfo} canais sem endereço`);
+    throw new NetError('empty', 'A lista não contém endereços de canais válidos.', {
+      hint: `Detalhe: ${parts.join(', ')}. Se o ficheiro foi descarregado pelo Safari ou pelos Atalhos, o fornecedor pode ter enviado uma resposta incompleta.`,
+    });
   }
 
   if (pending.length) await putMany('items', pending);
