@@ -68,6 +68,7 @@ function errorView(source, err) {
       <h3 class="import-result__title">Não foi possível importar</h3>
       <p class="import-result__text">${err.message}</p>
       ${err.hint ? html`<p class="field__hint import-result__text">${err.hint}</p>` : ''}
+      ${source.host ? html`<p class="field__hint import-result__text">Diagnóstico: ${err.code ?? 'erro'} · ${source.insecure ? 'http' : 'https'}://${source.host}</p>` : ''}
       ${canOfferDownload(source, err.code) ? html`
         <button class="btn btn--gradient btn--lg btn--block" type="button" data-download-help>${icon('download', { size: 'sm' })}<span>Obter a lista pelo Safari</span></button>` : ''}
       <div class="form-actions">

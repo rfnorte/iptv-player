@@ -14,7 +14,7 @@ import { toast } from './components/toast.js';
 
 /** Fontes para as quais esta ajuda se aplica. */
 export const canOfferDownload = (source, code) =>
-  source && source.type !== 'm3u-file' && (code === 'mixed' || code === 'network');
+  source && source.type !== 'm3u-file' && ['mixed', 'network', 'cors', 'unreachable'].includes(code);
 
 async function downloadUrlFor(source) {
   const c = await getCredentials(source);

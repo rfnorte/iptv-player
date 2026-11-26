@@ -73,8 +73,12 @@ async function run() {
   check(true, 'teste: stream HLS distinguido de lista');
   await page.fill('#src-url', `http://127.0.0.1:${NOCORS_PORT}/__mock/list.m3u`);
   await page.click('[data-test]');
-  await page.waitForFunction(() => document.querySelector('[data-test-result]')?.textContent.includes('Não foi possível ligar'));
-  check((await page.textContent('[data-test-result]')).includes('CORS'), 'teste: servidor sem CORS → mensagem com causa provável');
+  await page.waitForFunction(() => document.querySelector('[data-test-result]')?.textContent.includes('CORS'));
+  check((await page.textContent('[data-test-result]')).includes('não autoriza o acesso a partir de apps web (CORS)'), 'teste: servidor que responde sem CORS → diagnóstico "cors"');
+  await page.fill('#src-url', 'http://127.0.0.1:5299/lista.m3u');
+  await page.click('[data-test]');
+  await page.waitForFunction(() => document.querySelector('[data-test-result]')?.textContent.includes('Não foi possível contactar'));
+  check(true, 'teste: servidor inacessível → diagnóstico "unreachable"');
   await page.fill('#src-url', `${ORIGIN}/__mock/list.m3u`);
   await page.click('[data-test]');
   await page.waitForFunction(() => document.querySelector('[data-test-result]')?.textContent.includes('Lista acessível'));

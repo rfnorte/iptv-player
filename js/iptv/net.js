@@ -42,6 +42,31 @@ export function describeFetchError(err, url) {
 }
 
 /**
+ * Segunda sondagem após uma falha genérica: um pedido "no-cors" não permite ler
+ * a resposta, mas só falha se o servidor for inacessível (ou redirecionar para
+ * HTTP, que o iPhone bloqueia). Assim distinguimos CORS de servidor inacessível.
+ */
+export async function diagnoseFetchFailure(url) {
+  const base = describeFetchError(new TypeError('fetch failed'), url);
+  if (base.code !== 'network') return base;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10_000);
+  try {
+    await fetch(url, { mode: 'no-cors', credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'no-store', signal: ctrl.signal });
+    return new NetError('cors',
+      'O servidor responde, mas não autoriza o acesso a partir de apps web (CORS).',
+      { hint: 'É uma configuração do fornecedor. Alternativa: "Obter a lista pelo Safari" e importar como ficheiro.' });
+  } catch {
+    return new NetError('unreachable',
+      'Não foi possível contactar o servidor a partir da app.',
+      { hint: 'Causas prováveis: o endereço redireciona para HTTP (o iPhone bloqueia), o servidor está em baixo, ou o endereço está errado. Alternativa: "Obter a lista pelo Safari".' });
+  } finally {
+    clearTimeout(timer);
+    ctrl.abort();
+  }
+}
+
+/**
  * fetch com timeout até à resposta (cabeçalhos). O corpo tem timeout próprio de inatividade (readStream).
  */
 export async function fetchWithTimeout(url, { timeoutMs = 30_000, signal, headers } = {}) {
@@ -70,7 +95,9 @@ export async function fetchWithTimeout(url, { timeoutMs = 30_000, signal, header
     return res;
   } catch (err) {
     if (ctrl.signal.aborted && ctrl.signal.reason instanceof NetError) throw ctrl.signal.reason;
-    throw describeFetchError(err, url);
+    if (err instanceof NetError) throw err;
+    if (err?.name === 'AbortError' || signal?.aborted) throw describeFetchError(err, url);
+    throw await diagnoseFetchFailure(url);
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener('abort', onAbort);

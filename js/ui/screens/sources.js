@@ -164,7 +164,7 @@ function detailMarkup(s) {
           <div class="stat"><div class="stat__value">${new Intl.NumberFormat('pt-PT').format(s.counts?.series ?? 0)}</div><div class="stat__label">Séries</div></div>
         </div>
         <dl class="kv">
-          ${s.host ? html`<dt>Servidor</dt><dd class="truncate">${s.host}</dd>` : ''}
+          ${s.host ? html`<dt>Servidor</dt><dd class="truncate">${s.insecure ? 'http' : 'https'}://${s.host}</dd>` : ''}
           ${s.fileName ? html`<dt>Ficheiro</dt><dd class="truncate">${s.fileName}${s.fileSize ? html` · ${formatBytes(s.fileSize)}` : ''}</dd>` : ''}
           <dt>Última atualização</dt><dd>${s.lastUpdated ? `${formatRelative(s.lastUpdated)} (${new Date(s.lastUpdated).toLocaleString('pt-PT')})` : 'nunca'}</dd>
           ${s.type !== 'm3u-file' ? html`<dt>Atualização automática</dt><dd>${s.refreshHours ? `a cada ${s.refreshHours} h (ao abrir a app)` : 'desligada'}</dd>` : ''}
@@ -175,7 +175,7 @@ function detailMarkup(s) {
       ${err ? html`
         <div class="notice notice--error" role="alert">
           ${icon('alert', { size: 'sm' })}
-          <div class="notice__body"><div class="notice__title">${err.message}</div>${err.hint ?? ''}</div>
+          <div class="notice__body"><div class="notice__title">${err.message}</div>${err.hint ?? ''}<div class="notice__hint">Diagnóstico: ${err.code ?? 'erro'} · ${new Date(err.at ?? Date.now()).toLocaleString('pt-PT')}</div></div>
         </div>
         ${canOfferDownload(s, err.code) ? html`<button class="btn btn--gradient btn--lg btn--block" type="button" data-action="download-help">${icon('download', { size: 'sm' })}<span>Obter a lista pelo Safari</span></button>` : ''}` : ''}
       ${s.insecure ? html`
