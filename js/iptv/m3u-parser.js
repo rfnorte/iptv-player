@@ -53,11 +53,16 @@ export function parseExtinf(line) {
  * Endereços relativos ("media/x.m3u8") só são aceites com `baseUrl` (lista
  * obtida por endereço) e resolvidos em relação a ele.
  */
+const RELATIVE_PATH = /^[^\s<>"'`{}|\\^]+$/;
+
 export function normalizeStreamUrl(raw, baseUrl) {
   const value = cleanText(raw, 4096);
   if (!value) return { url: null, reason: 'empty' };
+  const isAbsolute = /^[a-z][a-z\d+.-]*:/i.test(value);
+  // Relativo: só com base e só se parecer um caminho (sem espaços nem marcação HTML).
+  if (!isAbsolute && (!baseUrl || !RELATIVE_PATH.test(value))) return { url: null, reason: 'invalid' };
   try {
-    const u = baseUrl && !/^[a-z][a-z\d+.-]*:/i.test(value) ? new URL(value, baseUrl) : new URL(value);
+    const u = isAbsolute ? new URL(value) : new URL(value, baseUrl);
     if (!ALLOWED_PROTOCOLS.has(u.protocol)) return { url: null, reason: 'protocol' };
     return { url: u.href, reason: null };
   } catch {
@@ -86,7 +91,7 @@ export class M3UParser {
     this.pending = null;
     this.pendingGroup = null;
     this.firstLine = true;
-    this.stats = { lines: 0, entries: 0, invalid: 0, unsupported: 0, orphanInfo: 0, header: false, hlsTags: 0 };
+    this.stats = { lines: 0, entries: 0, invalid: 0, unsupported: 0, orphanInfo: 0, header: false, hlsTags: 0, html: false };
     this.epgUrls = [];
   }
 
@@ -121,6 +126,10 @@ export class M3UParser {
     if (!line) return;
     this.stats.lines++;
 
+    // Página web (HTML/XML) em vez de lista: típico de páginas de erro, login ou do endereço errado.
+    if (this.stats.lines === 1 && /^<(!doctype|html|\?xml|head|body)\b/i.test(line)) this.stats.html = true;
+    if (this.stats.html) return;
+
     if (line.startsWith('#')) {
       const upper = line.slice(0, 8).toUpperCase();
       if (upper.startsWith('#EXTM3U')) {
@@ -141,7 +150,8 @@ export class M3UParser {
       return;
     }
 
-    const { url, reason } = normalizeStreamUrl(line, this.baseUrl);
+    // Endereços relativos apenas em listas M3U verdadeiras (com cabeçalho #EXTM3U).
+    const { url, reason } = normalizeStreamUrl(line, this.stats.header ? this.baseUrl : null);
     const info = this.pending;
     const group = this.pendingGroup;
     this.pending = null;

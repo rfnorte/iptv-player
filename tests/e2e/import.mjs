@@ -86,7 +86,19 @@ async function run() {
   check(true, 'teste: lista válida acessível');
   await shot(page, 'p3-01-test-ok');
 
+  /* 1b. Endereço de uma página web (ex.: a própria app) guardado sem testar → recusado */
+  await addSource(page, { name: 'Pagina', url: `${ORIGIN}/index.html` });
+  await page.click('[data-source-form] [type="submit"]');
+  check((await waitResult(page)) === 'Não foi possível importar', 'página web (HTML) recusada');
+  check((await page.textContent('.import-result')).includes('página web (HTML)'), 'mensagem explica que é uma página web');
+  await page.locator('.import-result a[href^="#/settings/sources/"]').click();
+  await page.waitForSelector('[data-action="delete"]');
+  await page.click('[data-action="delete"]');
+  await page.click('.dialog [data-confirm]');
+  await page.waitForSelector('.empty__title, .source-card');
+
   /* 2. Importar M3U por URL */
+  await addSource(page, { name: 'Teste', url: `${ORIGIN}/__mock/list.m3u` });
   await page.click('[data-source-form] [type="submit"]');
   check((await waitResult(page)) === 'Lista importada', 'import M3U por URL concluída');
   const stats = await page.$$eval('.stat__value', (els) => els.map((e) => Number(e.textContent.replace(/\D/g, ''))));

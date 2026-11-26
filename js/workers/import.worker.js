@@ -63,6 +63,11 @@ async function importM3U(sourceId, stream, total, overrides, baseUrl) {
   });
   const stats = parser.end();
 
+  if (stats.html) {
+    throw new NetError('format', 'O endereço devolveu uma página web (HTML), não uma lista M3U.', {
+      hint: 'Confirme que colou o endereço da lista fornecido pelo seu fornecedor, e não o endereço de um site ou desta app.',
+    });
+  }
   if (stats.entries === 0) {
     if (stats.hlsTags) {
       throw new NetError('format', 'Este endereço é um stream de vídeo (HLS), não uma lista de canais.', {

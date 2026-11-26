@@ -227,3 +227,20 @@ test('parser: URLs relativos só com endereço base', () => {
   // protocolos perigosos continuam rejeitados mesmo com base
   assert.equal(parseM3U('#EXTM3U\n#EXTINF:-1,X\njavascript:alert(1)\n', { baseUrl: 'https://a.example.com/' }).entries.length, 0);
 });
+
+test('parser: página HTML nunca gera canais (mesmo com endereço base)', () => {
+  const html = '<!doctype html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n<title>X</title>\n</head>\n<body>texto</body>';
+  const r = parseM3U(html, { baseUrl: 'https://exemplo.example.com/app/' });
+  assert.equal(r.entries.length, 0);
+  assert.equal(r.stats.html, true);
+});
+
+test('parser: texto sem cabeçalho #EXTM3U não vira endereços relativos', () => {
+  const r = parseM3U('linha qualquer\noutra/coisa\nhttps://a.example.com/x.m3u8\n', { baseUrl: 'https://b.example.com/' });
+  assert.deepEqual(r.entries.map((e) => e.url), ['https://a.example.com/x.m3u8']);
+});
+
+test('parser: linhas com espaços ou marcação não são caminhos relativos', () => {
+  const r = parseM3U('#EXTM3U\n#EXTINF:-1,A\n<meta x>\n#EXTINF:-1,B\ncom espacos.m3u8\n#EXTINF:-1,C\nok/c.m3u8\n', { baseUrl: 'https://b.example.com/l/' });
+  assert.deepEqual(r.entries.map((e) => e.name), ['C']);
+});
